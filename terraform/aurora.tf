@@ -6,7 +6,7 @@
 resource "aws_security_group" "aurora" {
   name_prefix = "${var.project_name}-aurora-"
   vpc_id      = module.vpc.vpc_id
-  description = "Aurora PostgreSQL へのアクセスを ECS タスクからのみ許可"
+  description = "Allow ECS tasks to access Aurora PostgreSQL"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "aurora_from_ecs" {
@@ -15,7 +15,7 @@ resource "aws_vpc_security_group_ingress_rule" "aurora_from_ecs" {
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "tcp"
-  description                  = "ECS タスクからの PostgreSQL 接続を許可"
+  description                  = "Allow PostgreSQL access from ECS tasks"
 }
 
 module "aurora" {
@@ -24,7 +24,7 @@ module "aurora" {
 
   name           = "${var.project_name}-${var.environment}"
   engine         = "aurora-postgresql"
-  engine_version = "18.1"
+  engine_version = "17.9"
 
   # Serverless v2（コスト最小: 未使用時はほぼ0に近い）
   serverlessv2_scaling_configuration = {

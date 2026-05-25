@@ -6,7 +6,7 @@
 resource "aws_security_group" "alb" {
   name_prefix = "${var.project_name}-alb-"
   vpc_id      = module.vpc.vpc_id
-  description = "ALB へのインターネットからの HTTP アクセスを許可"
+  description = "Allow HTTP access from internet to ALB"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "alb_http" {
@@ -15,7 +15,7 @@ resource "aws_vpc_security_group_ingress_rule" "alb_http" {
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"
-  description       = "HTTP アクセスを許可"
+  description       = "Allow HTTP access"
 }
 
 resource "aws_vpc_security_group_egress_rule" "alb_to_ecs" {
@@ -24,7 +24,7 @@ resource "aws_vpc_security_group_egress_rule" "alb_to_ecs" {
   from_port                    = var.app_port
   to_port                      = var.app_port
   ip_protocol                  = "tcp"
-  description                  = "ECS タスクへの転送を許可"
+  description                  = "Allow forwarding to ECS tasks"
 }
 
 # ALB 本体

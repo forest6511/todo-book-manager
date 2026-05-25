@@ -16,7 +16,7 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.project_name}-ecs-"
   vpc_id      = module.vpc.vpc_id
-  description = "ECS タスクのネットワークアクセス制御"
+  description = "Network access control for ECS tasks"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
@@ -25,14 +25,14 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
   from_port                    = var.app_port
   to_port                      = var.app_port
   ip_protocol                  = "tcp"
-  description                  = "ALB からのアクセスを許可"
+  description                  = "Allow access from ALB"
 }
 
 resource "aws_vpc_security_group_egress_rule" "ecs_all_outbound" {
   security_group_id = aws_security_group.ecs_tasks.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
-  description       = "すべてのアウトバウンドトラフィックを許可"
+  description       = "Allow all outbound traffic"
 }
 
 # CloudWatch ロググループ

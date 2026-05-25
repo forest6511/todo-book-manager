@@ -12,7 +12,7 @@ resource "random_password" "db_password" {
 # シークレット本体
 resource "aws_secretsmanager_secret" "db_credentials" {
   name                    = "${var.project_name}/${var.environment}/db-credentials"
-  description             = "書籍管理アプリの Aurora PostgreSQL 認証情報"
+  description             = "Book Manager Aurora PostgreSQL credentials"
   recovery_window_in_days = 0 # dev 環境では即時削除可能にする
 }
 

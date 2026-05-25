@@ -19,7 +19,7 @@ resource "aws_ecr_lifecycle_policy" "app" {
     rules = [
       {
         rulePriority = 1
-        description  = "最新10件のイメージのみ保持"
+        description  = "Keep only latest 10 images"
         selection = {
           tagStatus   = "any"
           countType   = "imageCountMoreThan"
