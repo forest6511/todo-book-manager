@@ -1,13 +1,11 @@
 # ==========================================
 # 自動タグ: main に push されるたびにパッチバージョンを上げる
 #
-# 例: v1.0.0 → v1.0.1 → v1.0.2 ...
+# 例: v0.0.0 → v0.0.1 → v0.0.2 ...
 #
 # マイナー/メジャーを上げたい場合:
-#   コミットメッセージに [minor] → v1.0.2 → v1.1.0
-#   コミットメッセージに [major] → v1.1.0 → v2.0.0
-#
-# 初回はタグがないため v0.1.0 から開始
+#   コミットメッセージに [minor] → v0.0.2 → v0.1.0
+#   コミットメッセージに [major] → v0.1.0 → v1.0.0
 # ==========================================
 name: Auto Tag
 
@@ -20,18 +18,16 @@ permissions:
 
 jobs:
   tag:
-    name: バージョンタグ作成
+    name: Create version tag
     runs-on: ubuntu-latest
-    # deploy.yml との二重実行を防ぐ: このワークフローでタグを作成
-    # → deploy.yml がタグトリガーでデプロイを実行
 
     steps:
-      - name: コードをチェックアウト
+      - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0  # タグ履歴の取得に必要
+          fetch-depth: 0
 
-      - name: 最新タグを取得
+      - name: Get latest tag
         id: latest-tag
         run: |
           LATEST=$(git tag -l 'v*.*.*' --sort=-version:refname | head -1)
@@ -39,17 +35,14 @@ jobs:
             LATEST="v0.0.0"
           fi
           echo "tag=$LATEST" >> $GITHUB_OUTPUT
-          echo "最新タグ: $LATEST"
 
-      - name: 次のバージョンを計算
+      - name: Calculate next version
         id: next-version
         run: |
           CURRENT="${{ steps.latest-tag.outputs.tag }}"
-          # v プレフィックスを除去
           VERSION="${CURRENT#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
-          # コミットメッセージからバージョンアップの種類を判定
           COMMIT_MSG=$(git log -1 --pretty=%B)
 
           if echo "$COMMIT_MSG" | grep -qi '\[major\]'; then
@@ -68,19 +61,19 @@ jobs:
 
           NEXT="v${MAJOR}.${MINOR}.${PATCH}"
           echo "version=$NEXT" >> $GITHUB_OUTPUT
-          echo "次のバージョン: $NEXT (${COMMIT_MSG%$'\n'*})"
 
-      - name: タグを作成して push
+      - name: Create and push tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "${{ steps.next-version.outputs.version }}" \
             -m "Release ${{ steps.next-version.outputs.version }} (${{ steps.next-version.outputs.bump }})"
           git push origin "${{ steps.next-version.outputs.version }}"
-          echo "タグ ${{ steps.next-version.outputs.version }} を作成しました"
 
-  # タグ作成後にデプロイを実行
-  deploy:
-    needs: tag
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.next-version.outputs.version }}
+          name: Release ${{ steps.next-version.outputs.version }}
+          generate_release_notes: true
+          draft: false
