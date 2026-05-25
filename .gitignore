@@ -1,0 +1,34 @@
+# === Java / Kotlin / Gradle ===
+backend/build/
+backend/.gradle/
+backend/bin/
+*.class
+*.jar
+*.war
+
+# === Node / Astro ===
+frontend/node_modules/
+frontend/dist/
+frontend/.astro/
+
+# === IDE ===
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# === 機密情報（キー漏洩防止） ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+terraform/*.tfvars
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+# === OS ===
+.DS_Store
+Thumbs.db

@@ -1,0 +1,39 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="書籍管理アプリケーション — ECS + Secrets Manager デモ" />
+    <title>{title} | 書籍管理</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>冊</text></svg>" />
+    <!-- CSS は import で取り込み済み -->
+  </head>
+  <body>
+    <header role="banner">
+      <nav aria-label="メインナビゲーション">
+        <a href="/" class="site-title">Book Manager</a>
+        <ul>
+          <li><a href="/">一覧</a></li>
+          <li><a href="/new">登録</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer>
+      <p>Book Manager &mdash; ECS + Secrets Manager デモアプリ</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+# メイン設定（本番環境用）
+# ECS タスク定義の secrets で Secrets Manager から環境変数として注入される
+# 参考: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/secrets-envvar-secrets-manager.html
+spring:
+  application:
+    name: book-manager
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME:bookmanager}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+
+  flyway:
+    enabled: true
+
+server:
+  port: 8080

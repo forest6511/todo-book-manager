@@ -1,0 +1,113 @@
+# ==========================================
+# CI: テスト・ビルド検証
+# PR 作成時と main/develop への push で実行
+# ==========================================
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: テスト
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: bookmanager
+          POSTGRES_USER: bookuser
+          POSTGRES_PASSWORD: bookpass
+        ports:
+          - 5432:5432
+        volumes:
+          - pgdata:/var/lib/postgresql
+        options: >-
+          --health-cmd="pg_isready -U bookuser -d bookmanager"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: コードをチェックアウト
+        uses: actions/checkout@v6
+
+      - name: JDK 21 セットアップ
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Gradle キャッシュ
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: テスト実行
+        working-directory: backend
+        run: ./gradlew test
+        env:
+          SPRING_PROFILES_ACTIVE: local
+
+      - name: テストレポートをアップロード
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: backend/build/reports/tests/test/
+          retention-days: 7
+
+  build:
+    name: ビルド検証
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: コードをチェックアウト
+        uses: actions/checkout@v6
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: フロントエンドビルド
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: JDK 21 セットアップ
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Gradle キャッシュ
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      - name: Spring Boot JAR ビルド
+        working-directory: backend
+        run: ./gradlew bootJar
+
+      - name: Docker ビルド検証
+        run: docker build --target extractor .

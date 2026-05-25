@@ -1,0 +1,85 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="書籍登録">
+  <section aria-labelledby="new-book-heading">
+    <h1 id="new-book-heading">New <span class="accent">Entry</span></h1>
+
+    <form id="book-form" class="glass-card form-card">
+      <div class="form-group">
+        <label for="title">タイトル <span class="required">*</span></label>
+        <input type="text" id="title" name="title" required placeholder="例: リーダブルコード" />
+      </div>
+
+      <div class="form-group">
+        <label for="author">著者 <span class="required">*</span></label>
+        <input type="text" id="author" name="author" required placeholder="例: Dustin Boswell" />
+      </div>
+
+      <div class="form-group">
+        <label for="isbn">ISBN</label>
+        <input type="text" id="isbn" name="isbn" placeholder="978-XXXXXXXXXX" />
+      </div>
+
+      <div class="form-group">
+        <label for="status">ステータス</label>
+        <select id="status" name="status">
+          <option value="UNREAD">未読</option>
+          <option value="READING">読書中</option>
+          <option value="COMPLETED">読了</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="memo">メモ</label>
+        <textarea id="memo" name="memo" rows="3" placeholder="この書籍についてのメモ..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">登録する</button>
+        <a href="/" class="btn btn-ghost">キャンセル</a>
+      </div>
+    </form>
+  </section>
+
+  <script>
+    const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080';
+
+    document.getElementById('book-form')!.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '登録中...';
+
+      const data = {
+        title: (form.querySelector('#title') as HTMLInputElement).value,
+        author: (form.querySelector('#author') as HTMLInputElement).value,
+        isbn: (form.querySelector('#isbn') as HTMLInputElement).value || null,
+        status: (form.querySelector('#status') as HTMLSelectElement).value,
+        memo: (form.querySelector('#memo') as HTMLTextAreaElement).value || null,
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/books`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          alert('登録に失敗しました。');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '登録する';
+        }
+      } catch {
+        alert('サーバーに接続できません。');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '登録する';
+      }
+    });
+  </script>
+</Layout>

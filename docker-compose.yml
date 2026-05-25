@@ -1,0 +1,18 @@
+# ローカル開発用 Docker Compose
+# PostgreSQL 18 を使用（Aurora PostgreSQL 18.1 互換）
+# PostgreSQL 18+ ではマウントパスが /var/lib/postgresql に変更
+services:
+  postgres:
+    image: postgres:18
+    container_name: bookmanager-db
+    environment:
+      POSTGRES_DB: bookmanager
+      POSTGRES_USER: bookuser
+      POSTGRES_PASSWORD: bookpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+volumes:
+  pgdata:

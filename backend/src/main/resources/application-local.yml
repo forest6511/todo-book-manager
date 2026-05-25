@@ -1,0 +1,8 @@
+# ローカル開発用設定
+# docker-compose で起動した PostgreSQL に接続する
+# 起動コマンド: ./gradlew bootRun --args='--spring.profiles.active=local'
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bookmanager
+    username: bookuser
+    password: bookpass
