@@ -3,12 +3,12 @@ package com.example.bookmanager.controller
 import com.example.bookmanager.entity.Book
 import com.example.bookmanager.entity.BookStatus
 import com.example.bookmanager.service.BookService
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = ["http://localhost:4321"])
 class BookController(private val bookService: BookService) {
 
     @GetMapping
@@ -25,7 +25,7 @@ class BookController(private val bookService: BookService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@RequestBody request: BookRequest): Book {
+    fun create(@Valid @RequestBody request: BookRequest): Book {
         val book = Book(
             title = request.title,
             author = request.author,
@@ -37,7 +37,7 @@ class BookController(private val bookService: BookService) {
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: Long, @RequestBody request: BookRequest): Book {
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: BookRequest): Book {
         val book = Book(
             title = request.title,
             author = request.author,

@@ -44,7 +44,10 @@ COPY --from=extractor /builder/extracted/spring-boot-loader/ ./
 COPY --from=extractor /builder/extracted/snapshot-dependencies/ ./
 COPY --from=extractor /builder/extracted/application/ ./
 
+# セキュリティ: root ユーザーで実行しない
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+USER appuser
+
 EXPOSE 8080
 
-# ECS タスク定義で SPRING_PROFILES_ACTIVE を設定
 ENTRYPOINT ["java", "-jar", "application.jar"]

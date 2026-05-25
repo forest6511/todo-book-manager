@@ -49,7 +49,7 @@ resource "aws_lb_target_group" "app" {
   target_type = "ip"
 
   health_check {
-    path                = "/api/books"
+    path                = "/actuator/health"
     port                = "traffic-port"
     healthy_threshold   = 2
     unhealthy_threshold = 3

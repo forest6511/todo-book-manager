@@ -28,8 +28,8 @@ module "aurora" {
 
   # Serverless v2（コスト最小: 未使用時はほぼ0に近い）
   serverlessv2_scaling_configuration = {
-    min_capacity = 0.5  # 最小値（これ以下にはできない）
-    max_capacity = 1.0  # 最大も抑える
+    min_capacity = 0.5
+    max_capacity = 1.0
   }
 
   instances = {
@@ -42,25 +42,25 @@ module "aurora" {
   vpc_id               = module.vpc.vpc_id
   db_subnet_group_name = module.vpc.database_subnet_group_name
 
-  security_group_rules = {
-    ecs_ingress = {
-      source_security_group_id = aws_security_group.ecs_tasks.id
-    }
-  }
+  # セキュリティグループは外部で作成したものを使用
+  create_security_group = false
+  vpc_security_group_ids = [aws_security_group.aurora.id]
 
   # DB 設定
-  database_name   = var.db_name
-  master_username = var.db_master_username
-  master_password = random_password.db_password.result
+  database_name               = var.db_name
+  master_username             = var.db_master_username
+  manage_master_user_password = false
+  master_password_wo          = random_password.db_password.result
+  master_password_wo_version  = 1
 
   # 暗号化
   storage_encrypted = true
 
   # dev 環境用の設定
-  skip_final_snapshot       = true
-  apply_immediately         = true
-  deletion_protection       = false
-  backup_retention_period   = 1
+  skip_final_snapshot     = true
+  apply_immediately       = true
+  deletion_protection     = false
+  backup_retention_period = 1
 
   # ログ
   enabled_cloudwatch_logs_exports = ["postgresql"]
